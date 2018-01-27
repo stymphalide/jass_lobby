@@ -6,15 +6,18 @@ defmodule Lobby.LobbySupervisor do
     Supervisor.start_link(__MODULE__, :ok, name: __MODULE__)
   end
   def create_lobby(name) do
-    Supervisor.start_link(__MODULE__, name)    
+    Supervisor.start_child(__MODULE__, [name])    
   end
-  def join_lobby(owner, name) do
+  def join_lobby(owner, name) when is_binary(owner) do
     Lobby.join(pid_from_owner(owner), name)
   end
+  def join_lobby(lobby, name) do
+    Lobby.join(lobby, name)
+  end
   def join_lobby(name) do
-    [first | _lobbies] =
+    [{_id, lobby, _type, _modules} | _lobbies] =
       Supervisor.which_children(__MODULE__)
-    join_lobby(owner.owner, name)
+    join_lobby(lobby, name)
   end
   def init(:ok) do
     Supervisor.init([Lobby], strategy: :simple_one_for_one)
@@ -22,7 +25,7 @@ defmodule Lobby.LobbySupervisor do
   defp pid_from_owner(owner) do
     owner
     |> Lobby.via_tuple()
-    |> Genserver.whereis()
+    |> GenServer.whereis()
   end
 
 end

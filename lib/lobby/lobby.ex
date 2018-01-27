@@ -17,7 +17,7 @@ defmodule Lobby.Lobby do
     send(self(), {:create_lobby, name})
     {:ok, name}
   end
-  def handle_info({:create_lobby, name}) do
+  def handle_info({:create_lobby, name}, _state_data) do
     lobby = create_lobby(name)
     {:noreply, lobby}
   end
@@ -31,21 +31,21 @@ defmodule Lobby.Lobby do
   end
 
   defp create_lobby(name) do
-    %Lobby{max_size: 4, owner: name, players: [name]. status: :open}
+    %__MODULE__{max_size: 4, owner: name, players: [name], status: :open}
   end
-  defp join_lobby(%Lobby{status: :open} = lobby, name) do
+  defp join_lobby(%__MODULE__{status: :open} = lobby, name) do
     lobby = 
-      %Lobby{lobby | players [name | lobby.players]}
+      %__MODULE__{lobby | players: [name | lobby.players]}
       |> get_status()
     {:ok, lobby}
   end
-  defp join_lobby(%Lobby{status: :closed} = lobby, _name) do
+  defp join_lobby(%__MODULE__{status: :closed}, _name) do
     :error
   end
-  defp get_status(%Lobby{max_size: max_size, players: names} = lobby) when length(names) == max_size do
-    %Lobby{lobby | status: :closed}
+  defp get_status(%__MODULE__{max_size: max_size, players: names} = lobby) when length(names) == max_size do
+    %__MODULE__{lobby | status: :closed}
   end
-  defp get_status(%Lobby{} = lobby) do
+  defp get_status(%__MODULE__{} = lobby) do
     lobby
   end
 end
