@@ -8,8 +8,8 @@ defmodule Lobby.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
-      # Starts a worker by calling: Lobby.Worker.start_link(arg)
-      # {Lobby.Worker, arg},
+      {Registry, keys: :unique, name: Registry.Lobby},
+      Lobby.LobbySupervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
