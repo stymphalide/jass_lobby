@@ -23,10 +23,12 @@ defmodule Lobby.Lobby do
   end
   def handle_call({:join, name}, _from, lobby) do
     case join_lobby(lobby, name) do
-      {:ok, updated_lobby} ->
-        {:reply, "joined successfully", updated_lobby}
       :error ->
-        {:reply, "Lobby is full!"}
+        {:reply, :error, lobby}
+      {:ok, %__MODULE__{status: :closed} = new_lobby} ->
+        {:stop, :shutdown, {:ok, new_lobby.players}, new_lobby}
+      {:ok, new_lobby} ->
+        {:reply, :ok, new_lobby}
     end
   end
 
