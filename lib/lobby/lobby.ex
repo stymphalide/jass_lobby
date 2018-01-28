@@ -34,10 +34,10 @@ defmodule Lobby.Lobby do
         {:reply, :error, lobby}
       {:ok, %__MODULE__{status: :closed} = new_lobby} ->
         :ets.delete(:lobby, new_lobby.owner)
-        {:stop, :shutdown, {:ok, new_lobby.players}, new_lobby}
+        {:stop, :shutdown, {:closed, new_lobby.players}, new_lobby}
       {:ok, new_lobby} ->
         :ets.insert(:lobby, {new_lobby.owner, new_lobby})
-        {:reply, :ok, new_lobby}
+        {:reply, {:open, new_lobby.players}, new_lobby}
     end
   end
 
