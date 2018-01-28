@@ -18,7 +18,14 @@ defmodule Lobby.Lobby do
     {:ok, name}
   end
   def handle_info({:create_lobby, name}, _state_data) do
-    lobby = create_lobby(name)
+    lobby = 
+      case :ets.lookup(:lobby, name) do
+        [] ->
+          create_lobby(name)
+        [{_key, new_lobby}] -> 
+          new_lobby
+      end
+    :ets.insert(:lobby, {name, lobby})
     {:noreply, lobby}
   end
   def handle_call({:join, name}, _from, lobby) do
@@ -26,8 +33,10 @@ defmodule Lobby.Lobby do
       :error ->
         {:reply, :error, lobby}
       {:ok, %__MODULE__{status: :closed} = new_lobby} ->
+        :ets.delete(:lobby, new_lobby.owner)
         {:stop, :shutdown, {:ok, new_lobby.players}, new_lobby}
       {:ok, new_lobby} ->
+        :ets.insert(:lobby, {new_lobby.owner, new_lobby})
         {:reply, :ok, new_lobby}
     end
   end
